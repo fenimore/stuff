@@ -1,0 +1,9 @@
+requests
+beautifulsoup4
+attr
+# Development
+# jupyter
+
+# testing
+responses
+mypy
