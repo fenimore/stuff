@@ -6,7 +6,7 @@ from urllib.parse import urlencode
 from bs4 import BeautifulSoup
 import requests
 
-from stuff.stuff import Stuff
+from stuff import Stuff
 from stuff.constants import Area, Region, Category
 
 
@@ -17,7 +17,7 @@ class Proximinity:
 
 
 @attr.s
-class Client:
+class Search:
     """
     Search object is used to construct valid searches on craigslist
     and return inventory of `Stuff` listings from the search.
@@ -62,7 +62,7 @@ class Client:
         for list_item in ul.find_all("li"):
             stuff = Stuff.parse_item(list_item)
             if with_details:
-                details = Client.get_details(stuff.url)
+                details = Search.get_details(stuff.url)
                 stuff.parse_details(BeautifulSoup(details, features="html.parser"))
             inventory.append(stuff)
         return inventory
@@ -70,7 +70,7 @@ class Client:
     @classmethod
     def enrich_inventory(cls, stuff: List[Stuff]) -> List[Stuff]:
         for s in stuff:
-            details = Client.get_details(s.url)
+            details = cls.get_details(s.url)
             s.parse_details(BeautifulSoup(details, features="html.parser"))
         return stuff
 

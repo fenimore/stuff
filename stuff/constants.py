@@ -5,6 +5,7 @@ class Category(Enum):
     free = "zip"
     furniture = "hsh"
 
+
 class Area(Enum):
     anywhere = ""
     brooklyn = "brk"

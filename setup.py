@@ -18,6 +18,11 @@ setuptools.setup(
         "attr",
         "beautifulsoup4",
     ],
+    extras_require={
+        'testing': ["mypy", "responses"],
+        'dev': ["jupyter"],
+        'stateful_client': ["sqlalchemy"],
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

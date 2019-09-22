@@ -1,6 +1,10 @@
+from attr import asdict
 import argparse
 
-from stuff import Client, Category, Region, Area, Proximinity
+from requests.exceptions import ConnectionError
+
+from stuff.search import Search, Category, Region, Area, Proximinity
+
 
 ITEM_STR = "Title: {}\nNeighborhood: {}\n{}\n"
 
@@ -19,7 +23,7 @@ if __name__ == "__main__":
 
     if args.zip:
         proximinity = Proximinity(search_distance=args.distance, postal=args.zip)
-    client = Client(
+    client = Search(
         root=args.root,
         region=Region[args.region],
         area=Area[args.area],
@@ -44,7 +48,9 @@ if __name__ == "__main__":
     if args.zip:
         print("Zip Code: {} Search Distance: {} miles".format(args.zip, args.distance))
     print("\nMost Recent Item:")
-    print(ITEM_STR.format(inventory[0].title, inventory[0].hood, inventory[0].url))
+    print(ITEM_STR.format(inventory[0].title, inventory[0].neighborhood, inventory[0].url))
+
+    print(asdict(inventory[0]))
 
     print("\n")
     print("1: enrich listings")
@@ -54,10 +60,13 @@ if __name__ == "__main__":
         option = input("Enter an option: ")
         if option == "1":
             print("Enriching inventory of size {}...".format(len(inventory)))
-            Client.enrich_inventory(inventory)
+            try:
+                Search.enrich_inventory(inventory)
+            except ConnectionError:
+                print("Craigslist is refusing our requests at the moment... try again in a few seconds")
         elif option == "2":
             for item in inventory:
-                print(ITEM_STR.format(item.title, item.hood, item.url))
+                print(ITEM_STR.format(item.title, item.neighborhood, item.url))
         elif option == "3":
             break
         else:
