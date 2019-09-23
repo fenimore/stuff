@@ -157,34 +157,44 @@ class SearchTestCase(unittest.TestCase):
 @pytest.mark.asyncio
 async def test_async_search_enrich_inventory(aresponses):
     inventory = [
-        Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-free-insulation/6977996917.html', title='FREE Insulation', time=datetime(2019, 9, 13, 15, 24), price=0, neighborhood='Bay Ridge, Brooklyn', image_urls=None, coordinates=None),
-        Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-large-navy-blue-area-rug-10-14/6977979965.html', title='Large navy blue area rug 10â\x80\x99 x 14â\x80\x99', time=datetime(2019, 9, 13, 14, 59), price=0, neighborhood='Greenpoint, Brooklyn', image_urls=None, coordinates=None),
-        Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-10-foot-round-pool/6977959276.html', title='10 foot round pool', time=datetime(2019, 9, 13, 14, 38), price=0, neighborhood='bklyn', image_urls=None, coordinates=None),
-        Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-backpacks/6977920854.html', title='Backpacks', time=datetime(2019, 9, 13, 13, 59), price=0, neighborhood='Brooklyn', image_urls=None, coordinates=None),
-        Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-microwave-popcorn-bags-free/6977920662.html', title='MICROWAVE POPCORN --- 8 BAGS --- FREE', time=datetime(2019, 9, 13, 13, 58), price=0, neighborhood='Bay Ridge', image_urls=None, coordinates=None),
-        Stuff(url='https://newyork.craigslist.org/brk/zip/d/ridgewood-large-comfy-shaped-couch/6977891536.html', title='Large Comfy L Shaped Couch', time=datetime(2019, 9, 13, 13, 29), price=0, neighborhood='Ridgewood', image_urls=None, coordinates=None),
-        Stuff(url='https://newyork.craigslist.org/brk/zip/d/ridgewood-large-comfy-couch/6977889916.html', title='Large Comfy Couch', time=datetime(2019, 9, 13, 13, 27), price=0, neighborhood='Ridgewood', image_urls=None, coordinates=None),
-        Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-metal-blinds-7-sets/6977848007.html', title='METAL BLINDS - 7 SETS', time=datetime(2019, 9, 13, 12, 44), price=0, neighborhood='greenpoint', image_urls=None, coordinates=None),
-        Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-balmoral-silver-cross-pram/6969522828.html', title='Balmoral Silver Cross Pram', time=datetime(2019, 9, 13, 12, 22), price=0, neighborhood='Bushwick', image_urls=None, coordinates=None),
-        Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-4x8-flats-skinned-with-red/6977777316.html', title="4'x8' Flats Skinned with Red Plexi, 8 pieces", time=datetime(2019, 9, 13, 11, 32), price=0, neighborhood='Gowanus', image_urls=None, coordinates=None),
-        Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-two-scuffed-pieces-of/6977747012.html', title='Two scuffed pieces of plexiglass', time=datetime(2019, 9, 13, 10, 58), price=0, neighborhood='Brooklyn', image_urls=None, coordinates=None),
-        Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-canon-mp210-printer-needs/6957849314.html', title='Canon MP210 printer, NEEDS REPAIR, usb cord tip broken/rusted', time=datetime(2019, 9, 13, 10, 48), price=0, neighborhood='Kensington, Brooklyn', image_urls=None, coordinates=None),
+        Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-free-insulation/6977996917.html',
+              title='FREE Insulation', time=datetime(2019, 9, 13, 15, 24), price=0,
+              neighborhood='Bay Ridge, Brooklyn', image_urls=None, coordinates=None),
+        Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-large-navy-blue-area-rug-10-14/6977979965.html',
+              title='Large navy blue area rug 10â\x80\x99 x 14â\x80\x99', time=datetime(2019, 9, 13, 14, 59),
+              price=0, neighborhood='Greenpoint, Brooklyn', image_urls=None, coordinates=None),
+        Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-10-foot-round-pool/6977959276.html',
+              title='10 foot round pool', time=datetime(2019, 9, 13, 14, 38), price=0, neighborhood='bklyn',
+              image_urls=None, coordinates=None),
+        Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-microwave-popcorn-bags-free/6977920662.html',
+              title='MICROWAVE POPCORN --- 8 BAGS --- FREE', time=datetime(2019, 9, 13, 13, 58), price=0,
+              neighborhood='Bay Ridge', image_urls=None, coordinates=None),
     ]
     aresponses.add(
-        "newyork.craigslist.org",
-        re.compile("\/brk\/zip\/d\/[^.]+\.html"),
+        "newyork.craigslist.org", re.compile(r"\/brk\/zip\/d\/brooklyn-free-insulation[^.]+\.html"),
+        'get', aresponses.Response(text=_data("craigslist_zip_item_page.html"))
+    )
+    aresponses.add(
+        "newyork.craigslist.org", re.compile(r"\/brk\/zip\/d\/brooklyn-large-navy[^.]+\.html"),
+        'get', aresponses.Response(text=_data("craigslist_zip_item_page.html"))
+    )
+    aresponses.add(
+        "newyork.craigslist.org", re.compile(r"\/brk\/zip\/d\/brooklyn-10-foot[^.]+\.html"),
+        'get', aresponses.Response(text=_data("craigslist_zip_item_page.html"))
+    )
+    aresponses.add(
+        "newyork.craigslist.org", re.compile(r"\/brk\/zip\/d\/brooklyn-microwave-popcorn[^.]+\.html"),
         'get', aresponses.Response(text=_data("craigslist_zip_item_page.html"))
     )
     expected = Stuff(
-        url='https://newyork.craigslist.org/brk/zip/d/brooklyn-2-round-blue-outdoor-side/6979177488.html',
-        title='2 Round Blue Outdoor Side Tables',
-        time=datetime(2019, 9, 15, 12, 15),
+        url='https://newyork.craigslist.org/brk/zip/d/brooklyn-free-insulation/6977996917.html',
+        title='FREE Insulation',
+        time=datetime(2019, 9, 13, 15, 24),
         price=0,
-        neighborhood='Ditmas Park Area, Brooklyn',
+        neighborhood='Bay Ridge, Brooklyn',
         image_urls=['https://images.craigslist.org/00L0L_5e2M7zY0JYR_600x450.jpg'],
-        coordinates=Coordinates(longitude='-73.957000', latitude='40.646700'),
+        coordinates=Coordinates(longitude='-73.957000', latitude='40.646700')
     )
-    #assert expected != inventory[0]
+    assert expected != inventory[0]
     await Search._async_enrich_inventory(inventory)
-    print(inventory)
     assert expected == inventory[0]

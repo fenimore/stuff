@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, ValuesView
 import attr
 import os
 from urllib.parse import urlencode
@@ -55,8 +55,6 @@ class Search:
 
     def get_text(self) -> str:
         url = self.build_url()
-        print(":SDFSDF")
-        print(url)
         r = requests.get(url)
         return r.text
 
@@ -71,7 +69,8 @@ class Search:
 
     @classmethod
     def enrich_inventory(cls, stuff: List[Stuff]) -> List[Stuff]:
-        return asyncio.run(cls._async_enrich_inventory(stuff))
+        task = asyncio.create_task(cls._async_enrich_inventory(stuff))
+        return asyncio.run(task)
 
     @classmethod
     async def async_details(cls, url, session):
@@ -79,7 +78,7 @@ class Search:
             return (await response.text(), url)
 
     @classmethod
-    async def _async_enrich_inventory(cls, inventory: List[Stuff]) -> List[Stuff]:
+    async def _async_enrich_inventory(cls, inventory: List[Stuff]) -> ValuesView[Stuff]:
         tasks = []
         stuffs = {}
         async with ClientSession() as session:
