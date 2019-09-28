@@ -44,4 +44,4 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            pytest --mypy -s
+            pytest --mypy -s -vv
