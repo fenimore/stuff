@@ -1,7 +1,7 @@
 from typing import List
 import attr
 from datetime import datetime
-from stuff import Stuff as ApiStuff
+from stuff.core import Coordinates, Stuff as ApiStuff
 
 from contextlib import contextmanager
 
@@ -10,7 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 from sqlalchemy.engine import Engine
-from sqlalchemy import Column, Integer, String, DateTime, Float
+from sqlalchemy import Column, Integer, String, DateTime, Float, Boolean
 
 
 Base = declarative_base()
@@ -23,20 +23,38 @@ class DBStuff(Base):
     url = Column("url", String, nullable=False, unique=True)
     price = Column('price', Integer)
     time = Column('time', DateTime)
+    neighborhood = Column("neighborhood", String)
     longitude = Column('longititude', Float)
     latitude = Column('latitude', Float)
     image_url = Column('image_url', String)
+    delivered = Column('delivered', Boolean, default=False)
 
     @classmethod
     def from_api_model(cls, stuff: ApiStuff):
         return cls(
+            id=stuff.id,
             title=stuff.title,
             url=stuff.url,
             time=stuff.time,
             price=stuff.price,
+            neighborhood=stuff.neighborhood,
             longitude=stuff.coordinates.longitude if stuff.coordinates else None,
             latitude=stuff.coordinates.latitude if stuff.coordinates else None,
             image_url=stuff.image_urls[0] if stuff.image_urls else None,
+            delivered=stuff.delivered,
+        )
+
+    def to_api_model(self):
+        return ApiStuff(
+            id=self.id,
+            title=self.title,
+            url=self.url,
+            time=self.time,
+            price=self.price,
+            neighborhood=self.neighborhood,
+            coordinates=Coordinates(longitude=self.longitude, latitude=self.latitude),
+            image_urls=[self.image_url],
+            delivered=self.delivered,
         )
 
     def __str__(self):
@@ -77,6 +95,21 @@ class DBClient:
     def get_stuff_by_url(self, url) -> DBStuff:
         with self.db_connection() as session:
             return session.query(DBStuff).filter_by(url=url).one_or_none()
+
+    def update_stuff(self, update_stuff: DBStuff) -> DBStuff:
+        with self.db_connection() as session:
+            stuff = session.query(DBStuff).get(update_stuff.id)
+            stuff.title = update_stuff.title
+            stuff.url = update_stuff.url
+            stuff.time = update_stuff.time
+            stuff.price = update_stuff.price
+            stuff.neighborhood = update_stuff.neighborhood
+            stuff.longitude = update_stuff.longitude
+            stuff.latitude = update_stuff.latitude
+            stuff.image_url = update_stuff.image_url
+            stuff.delivered = update_stuff.delivered
+            session.commit()
+            return update_stuff
 
     @contextmanager
     def db_connection(self):

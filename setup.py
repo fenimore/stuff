@@ -22,6 +22,7 @@ setuptools.setup(
         'testing': ["mypy", "responses"],
         'dev': ["jupyter"],
         'stateful_client': ["sqlalchemy"],
+        'twitter': ["python-twitter"],
     },
     classifiers=[
         "Programming Language :: Python :: 3",

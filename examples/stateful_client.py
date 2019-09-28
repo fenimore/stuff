@@ -23,6 +23,10 @@ class StatefulClient:
     def setup(self):
         self.db_client.create_db()
 
+    def refresh(self):
+        self.db_client.drop_db()
+        self.db_client.create_db()
+
     def populate_db(self):
         for item in self.search.get_inventory():
             stuff = DBStuff.from_api_model(item)
@@ -38,9 +42,12 @@ if __name__ == "__main__":
         area=Area.brooklyn,
         category=Category.furniture,
         keyword=None,
-        proximinity=Proximinity(2, 11238),
+        proximinity=Proximinity(3, 11238),
     )
     client.populate_db()
     all_stuff = client.db_client.get_all_stuff()
-    for stuff in all_stuff[0:3]:
-        print(stuff)
+
+    for idx, stuff in enumerate(all_stuff[0:10]):
+        print(f"{idx}: {stuff.title}")
+    print(f"Length: {len(all_stuff)}")
+    print(len(all_stuff))

@@ -6,7 +6,7 @@ from urllib.parse import urlencode
 from bs4 import BeautifulSoup
 import requests
 
-from stuff import Stuff
+from stuff.core import Stuff
 from stuff.constants import Area, Region, Category
 
 import asyncio
