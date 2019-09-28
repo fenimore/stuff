@@ -8,6 +8,6 @@ pytest
 aresponses
 responses
 mypy
+pytest-mypy
 
 sqlalchemy
-sqlite3
