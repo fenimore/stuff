@@ -1,7 +1,13 @@
 requests
 beautifulsoup4
 attr
+aiohttp
 
 # testing
+pytest
+aresponses
 responses
 mypy
+
+sqlalchemy
+sqlite3
