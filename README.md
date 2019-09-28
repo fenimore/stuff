@@ -1,5 +1,7 @@
 # Stuff
 
+[![CircleCI](https://circleci.com/gh/fenimore/stuff/tree/master.svg?style=svg)](https://circleci.com/gh/fenimore/stuff/tree/master)
+
 ```
   /$$$$$$   /$$                /$$$$$$   /$$$$$$
  /$$__  $$ | $$               /$$__  $$ /$$__  $$
