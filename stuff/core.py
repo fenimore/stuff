@@ -30,7 +30,7 @@ class Stuff:
     delivered: bool = attr.ib(default=False)
     id: int = attr.ib(default=None)
 
-    def to_api_dict(self):
+    def to_api_dict(self) -> dict:
         d = attr.asdict(self)
 
         d["longitude"] = d["coodinates"]["longitude"]
@@ -43,7 +43,7 @@ class Stuff:
         return d
 
     @classmethod
-    def from_api_dict(cls, d):
+    def from_api_dict(cls, d: dict):
         d["coodinates"]["longitude"] = d["longitude"]
         d["coodinates"]["latitude"] = d["latitude"]
         del d["longitude"]

@@ -1,4 +1,4 @@
-from typing import List, ValuesView
+from typing import List, ValuesView, Optional
 import attr
 import os
 from urllib.parse import urlencode
@@ -29,8 +29,8 @@ class Search:
     region: Region = attr.ib(default=Region.new_york_city)
     area: Area = attr.ib(default=Area.anywhere)
     category: Category = attr.ib(default=Category.free)
-    query: str = attr.ib(default=None)
-    proximinity: Proximinity = attr.ib(default=None)
+    query: Optional[str] = attr.ib(default=None)
+    proximinity: Optional[Proximinity] = attr.ib(default=None)
     # size: int = attr.ib(default=None)  # TODO: pagination size, if supporting pagination
 
     def build_url(self) -> str:

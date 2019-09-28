@@ -42,7 +42,7 @@ if __name__ == "__main__":
         area=Area.brooklyn,
         category=Category.furniture,
         keyword=None,
-        proximinity=Proximinity(3, 11238),
+        proximinity=Proximinity(3, "11238"),
     )
     client.populate_db()
     all_stuff = client.db_client.get_all_stuff()

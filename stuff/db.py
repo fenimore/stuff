@@ -16,7 +16,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Float, Boolean
 Base = declarative_base()
 
 
-class DBStuff(Base):
+class DBStuff(Base):  # type: ignore
     __tablename__ = 'stuff'
     id = Column(Integer, primary_key=True)
     title = Column("title", String, nullable=False)
@@ -87,6 +87,12 @@ class DBClient:
     def get_all_stuff(self) -> List[DBStuff]:
         with self.db_connection() as session:
             return session.query(DBStuff).order_by(DBStuff.time.desc()).all()
+
+    def get_all_undelivered_stuff(self) -> List[DBStuff]:
+        with self.db_connection() as session:
+            return session.query(DBStuff).filter_by(
+                delivered=False
+            ).order_by(DBStuff.time.desc()).all()
 
     def get_stuff_by_id(self, _id) -> DBStuff:
         with self.db_connection() as session:

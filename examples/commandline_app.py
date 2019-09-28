@@ -30,7 +30,7 @@ if __name__ == "__main__":
         category=Category[args.category],
         proximinity=proximinity if args.zip else None,
     )
-    inventory = client.get_inventory(with_details=args.with_details)
+    inventory = client.get_inventory()
 
     print("""
   /$$$$$$   /$$                /$$$$$$   /$$$$$$
