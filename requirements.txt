@@ -3,6 +3,10 @@ beautifulsoup4
 attr
 aiohttp
 
+# emit
+python-twitter
+twilio
+
 # testing
 pytest
 aresponses

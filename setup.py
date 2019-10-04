@@ -23,6 +23,7 @@ setuptools.setup(
         'testing': ["mypy", "responses"],
         'dev': ["jupyter"],
         'stateful_client': ["sqlalchemy"],
+        'sms': ["twilio"],
         'twitter': ["python-twitter"],
     },
     classifiers=[

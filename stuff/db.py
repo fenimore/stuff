@@ -26,7 +26,7 @@ class DBStuff(Base):  # type: ignore
     neighborhood = Column("neighborhood", String)
     longitude = Column('longititude', Float)
     latitude = Column('latitude', Float)
-    image_url = Column('image_url', String)
+    image_url = Column('image_url', String)  # TODO: use relation to make image_urls
     delivered = Column('delivered', Boolean, default=False)
 
     @classmethod
@@ -78,42 +78,55 @@ class DBClient:
         Base.metadata.drop_all(connection)
         connection.close()
 
-    def insert_stuff(self, stuff: DBStuff) -> int:
+    def insert_stuff(self, stuff: ApiStuff) -> int:
+        db_stuff = DBStuff.from_api_model(stuff)
         with self.db_connection() as session:
-            session.add(stuff)
+            session.add(db_stuff)
             session.commit()
-            return stuff.id
+            return db_stuff.id
 
-    def get_all_stuff(self) -> List[DBStuff]:
+    def get_all_stuff(self) -> List[ApiStuff]:
+        """get_all_stuff returns all the stuff ordered recent -> oldest"""
         with self.db_connection() as session:
-            return session.query(DBStuff).order_by(DBStuff.time.desc()).all()
+            all_stuff = session.query(DBStuff).order_by(DBStuff.time.desc()).all()
+            return [stuff.to_api_model() for stuff in all_stuff]
 
-    def get_all_undelivered_stuff(self) -> List[DBStuff]:
+    def get_all_undelivered_stuff(self) -> List[ApiStuff]:
+        """get_all_undelivered_stuff returns all the stuff ordered recent -> oldest"""
         with self.db_connection() as session:
-            return session.query(DBStuff).filter_by(
+            undelivered = session.query(DBStuff).filter_by(
                 delivered=False
             ).order_by(DBStuff.time.desc()).all()
+            return [stuff.to_api_model() for stuff in undelivered]
 
-    def get_stuff_by_id(self, _id) -> DBStuff:
+    def get_stuff_by_id(self, _id) -> ApiStuff:
         with self.db_connection() as session:
-            return session.query(DBStuff).get(_id)
+            stuff = session.query(DBStuff).get(_id)
+            if stuff:
+                return stuff.to_api_model()
+            else:
+                return None
 
-    def get_stuff_by_url(self, url) -> DBStuff:
+    def get_stuff_by_url(self, url) -> ApiStuff:
         with self.db_connection() as session:
-            return session.query(DBStuff).filter_by(url=url).one_or_none()
+            db_stuff = session.query(DBStuff).filter_by(url=url).one_or_none()
+            if db_stuff:
+                return db_stuff.to_api_model()
+            return None
 
-    def update_stuff(self, update_stuff: DBStuff) -> DBStuff:
+    def update_stuff(self, update_stuff: ApiStuff) -> ApiStuff:
+        db_stuff = DBStuff.from_api_model(update_stuff)
         with self.db_connection() as session:
             stuff = session.query(DBStuff).get(update_stuff.id)
-            stuff.title = update_stuff.title
-            stuff.url = update_stuff.url
-            stuff.time = update_stuff.time
-            stuff.price = update_stuff.price
-            stuff.neighborhood = update_stuff.neighborhood
-            stuff.longitude = update_stuff.longitude
-            stuff.latitude = update_stuff.latitude
-            stuff.image_url = update_stuff.image_url
-            stuff.delivered = update_stuff.delivered
+            stuff.title = db_stuff.title
+            stuff.url = db_stuff.url
+            stuff.time = db_stuff.time
+            stuff.price = db_stuff.price
+            stuff.neighborhood = db_stuff.neighborhood
+            stuff.longitude = db_stuff.longitude
+            stuff.latitude = db_stuff.latitude
+            stuff.image_url = db_stuff.image_url
+            stuff.delivered = db_stuff.delivered
             session.commit()
             return update_stuff
 

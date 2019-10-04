@@ -65,10 +65,11 @@ class DBClientTestCase(unittest.TestCase):
 
     def test_client_insert_and_fetch_by_id(self):
         stuff_id = self.client.insert_stuff(
-            DBStuff(
+            Stuff(
                 title="My Title", url="https://somewhere.com/",
                 time=datetime(2019, 4, 20), price=0,
-                longitude=None, latitude=None, image_url=None,
+                neighborhood="Clinton Hill",
+                coordinates=None, image_urls=None,
             )
         )
         actual = self.client.get_stuff_by_id(stuff_id)
@@ -78,10 +79,11 @@ class DBClientTestCase(unittest.TestCase):
 
     def test_client_insert_and_fetch_by_url(self):
         stuff_id = self.client.insert_stuff(
-            DBStuff(
+            Stuff(
                 title="My Title", url="https://somewhere.com",
                 time=datetime(2019, 4, 20), price=0,
-                longitude=None, latitude=None, image_url=None,
+                neighborhood="Clinton Hill",
+                coordinates=None, image_urls=None,
             )
         )
         actual = self.client.get_stuff_by_url("https://somewhere.com")
@@ -91,34 +93,32 @@ class DBClientTestCase(unittest.TestCase):
 
     def test_client_roundtrip_id(self):
         stuff_id = self.client.insert_stuff(
-            DBStuff(
+            Stuff(
                 title="My Title", url="https://somewhere.com/",
                 time=datetime(2019, 4, 20), price=0,
-                longitude=None, latitude=None, image_url=None,
+                neighborhood="Clinton Hill",
+                coordinates=None, image_urls=None,
             )
         )
         actual = self.client.get_stuff_by_id(stuff_id)
         self.assertEqual(actual.id, stuff_id)
-        api_stuff = actual.to_api_model()
-        self.assertEqual(api_stuff.id, stuff_id)
-        roundtrip_stuff = DBStuff.from_api_model(api_stuff)
+        roundtrip_stuff = DBStuff.from_api_model(actual)
         self.assertEqual(roundtrip_stuff.id, stuff_id)
 
     def test_client_update_stuff(self):
         stuff_id = self.client.insert_stuff(
-            DBStuff(
+            Stuff(
                 title="My Title", url="https://somewhere.com/",
                 time=datetime(2019, 4, 20), price=0,
-                longitude=None, latitude=None, image_url=None,
+                neighborhood="Clinton Hill",
+                coordinates=None, image_urls=None,
             )
         )
         stuff = self.client.get_stuff_by_id(stuff_id)
         self.assertEqual(stuff.delivered, False)
 
-        api_stuff = stuff.to_api_model()
-        api_stuff.delivered = True
-        update_stuff = DBStuff.from_api_model(api_stuff)
-        self.client.update_stuff(update_stuff)
+        stuff.delivered = True
+        self.client.update_stuff(stuff)
 
         updated_stuff = self.client.get_stuff_by_id(stuff.id)
         self.assertEqual(updated_stuff.delivered, True)

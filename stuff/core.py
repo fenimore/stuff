@@ -5,6 +5,10 @@ import attr
 from datetime import datetime
 
 
+class EmitFailure(Exception):
+    pass
+
+
 @attr.s
 class Coordinates:
     longitude: int = attr.ib()
