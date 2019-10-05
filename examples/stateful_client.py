@@ -10,14 +10,8 @@ from stuff.core import Stuff, EmitFailure
 from stuff.constants import Area, Region, Category
 from stuff.search import Search, Proximinity
 from stuff.db import DBClient
-# from stuff.emit_sms import EmitSms
+from stuff.emit_sms import EmitSms
 # from stuff.emit_twitter import EmitTweet
-
-
-class EmitStdout:
-    def emit(self, stuff) -> str:
-        print("New Stuff: {}".format(stuff.title))
-        return "stdout: success"
 
 
 @attr.s
@@ -73,11 +67,10 @@ class StatefulClient:
             stuff.delivered = True
             self.db_client.update_stuff(stuff)
         except EmitFailure as e:
-            result = "Failure {}".format(e)
+            result = "Failure Delivering {}".format(e)
             self.log.error(result)
         return result
 
-    # TODO: interrupt ctrl-c
     def loop(self):
         self.populate_db(set_delivered=True)
         self.log.info("Starting Loop")
@@ -105,18 +98,13 @@ if __name__ == "__main__":
     config = configparser.ConfigParser()
     config.read(args.secrets)
 
-    # emitter = EmitSms.new(
-    #     account_sid=config["twilio"]["account_sid"],
-    #     auth_token=config["twilio"]["auth_token"],
-    #     from_phone=config["twilio"]["from_phone"],
-    #     to_phone=config["twilio"]["to_phone"],
-    # )
-    # emitter = EmitTweet.new(
-    #     consumer_key=config["twitter"]["consumer_key"],
-    #     consumer_secret=config["twitter"]["consumer_secret"],
-    #     access_token_key=config["twitter"]["access_token_key"],
-    #     access_token_secret=config["twitter"]["access_token_secret"],
-    # )
+    emitter = EmitSms.new(
+        account_sid=config["twilio-test"]["account_sid"],
+        auth_token=config["twilio-test"]["auth_token"],
+        from_phone=config["twilio-test"]["from_phone"],
+        to_phone=config["twilio-test"]["to_phone"],
+    )
+
     emitter = EmitStdout()
     sleep_time = int(config["app"]["sleep"])
     log_level = config["app"]["log"]
