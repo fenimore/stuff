@@ -15,6 +15,20 @@ from stuff.emitters import EmitSms, Emitter, EmitStdout
 
 @attr.s
 class StatefulClient:
+    """
+    The StatefulClient is the main entrypoint for the `stuff` package.
+    It ties together the necessary search and DB client
+    with an arbitrary `stuff.emitters.Emitter`.
+
+    client = StatefulClient.new()  # default Stdout emitter
+    client.setup()  # create in memory db tables
+    try:
+        client.loop()
+    except KeyboardInterrupt:
+        client.log.info("Interrupted the loop with keyboard")
+        sys.exit(0)
+    """
+
     db_client: DBClient = attr.ib()
     search: Search = attr.ib()
     emitter: Emitter = attr.ib()
