@@ -66,6 +66,18 @@ class SearchTestCase(unittest.TestCase):
         self.assertEqual(expected, inventory[0])
         self.assertEqual(120, len(inventory))
 
+    @unittest.skip("This test has no fake/mocked parts, don't run wiley niley")
+    def test_search_enrich_inventory_can_run_enrich_async_in_sync_thread(self):
+        search = Search()
+        inventory = search.get_inventory()[:10]
+        self.assertFalse(any([inv.coordinates for inv in inventory]))
+        self.assertFalse(any([inv.image_urls for inv in inventory]))
+
+        inventory = Search.enrich_inventory(inventory)
+        self.assertTrue(any([inv.coordinates for inv in inventory]))
+        self.assertTrue(any([inv.image_urls for inv in inventory]))
+        self.assertEqual(10, len(inventory))
+
 
 @pytest.mark.asyncio
 async def test_async_search_enrich_inventory(aresponses):

@@ -69,8 +69,7 @@ class Search:
 
     @classmethod
     def enrich_inventory(cls, stuff: List[Stuff]) -> List[Stuff]:
-        task = asyncio.create_task(cls._async_enrich_inventory(stuff))
-        return asyncio.run(task)
+        return asyncio.run(cls._async_enrich_inventory(stuff))
 
     @classmethod
     async def async_details(cls, url, session):

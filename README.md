@@ -20,7 +20,7 @@ Run the tests
 
     pip install -e .
     pip install  pytest-mypy sqlalchemy responses aresponses  # for async responses
-    pytest -mypy -s -v  # test type hints
+    pytest -mypy -s -vv  # test type hints
 
 The twilio emission tests are skipped in CI (must create necessary authorization tokens)
 
@@ -33,7 +33,7 @@ Copy the `.secrets_example` file and fill in with valid credentials to start usi
 The an example use of the `stuff` client can be run using the `main.py` module:
 
 
-    python main.py
+    python main.py --zip 11001
 
 
 ```

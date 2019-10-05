@@ -72,14 +72,19 @@ class StatefulClient:
         using a media-ready emission API (not stdout or sms) like twitter
         """
         inventory = self.search.get_inventory()
-        if enrich_inventory:
-            inventory = Search.enrich_inventory(inventory)
+        # check if things not in db exits
+        new_items = [
+            item for item in inventory
+            if not self.db_client.get_stuff_by_url(item.url)
+        ]
+        if enrich_inventory and new_items:
+            self.logger.info(f"Enriching {len(new_items)} items")
+            new_items = Search.enrich_inventory(new_items)
 
-        for item in inventory:
-            if not self.db_client.get_stuff_by_url(item.url):
-                item.delivered = set_delivered
-                self.db_client.insert_stuff(item)
-                self.logger.info("insert {}".format(item.title))
+        for item in new_items:
+            item.delivered = set_delivered
+            self.db_client.insert_stuff(item)
+            self.logger.info("Insert: {}".format(item.title))
 
     def deliver(self, stuff: Stuff) -> str:
         try:
@@ -93,17 +98,18 @@ class StatefulClient:
         return result
 
     def loop(self, with_media=False):
+        self.logger.info("Initial Populating of Database with all stuff marked delivered")
         self.populate_db(set_delivered=True, enrich_inventory=with_media)
         self.logger.info("Starting Loop")
         while True:
             try:
-                self.populate_db(enrich_inventory=with_media)
                 all_stuff = self.db_client.get_all_undelivered_stuff()
                 if len(all_stuff) > 0:
                     self.logger.info("Emitting: {}".format(all_stuff[0].title))
                     self.deliver(all_stuff[0])
                 else:
                     self.logger.debug("Nothing to emit")
+                self.populate_db(enrich_inventory=with_media)
             except Exception as e:
                 self.logger.error("Exception in main loop {}".format(e))
             self.logger.debug("Sleeping {} seconds".format(self.sleep_seconds))
