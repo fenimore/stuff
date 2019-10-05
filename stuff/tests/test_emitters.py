@@ -12,6 +12,7 @@ from stuff.emitters import EmitTweet, EmitSms
 from stuff.core import Stuff
 
 
+@skip("CI doesn't have the .secrets for twilio sandbox test credentials")
 class EmitterTestCase(unittest.TestCase):
     def setUp(self):
         config_path = os.path.join(os.path.dirname(__file__), "../../.secrets")
@@ -48,7 +49,6 @@ class EmitterTestCase(unittest.TestCase):
         self.assertEqual(status.id, 123)
         self.assertEqual(status.text, "Furniture for 0 at Clinton Hill. Click https://somewhere.com/ for more details")
 
-    @skip("CI doesn't have the .secrets for twilio sandbox test credentials")
     def test_emit_sms_success(self):
         message = self.sms_emitter.emit(self.stuff)
         self.assertEqual(message.status, "queued")

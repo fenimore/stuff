@@ -69,7 +69,16 @@ class Search:
 
     @classmethod
     def enrich_inventory(cls, stuff: List[Stuff]) -> List[Stuff]:
-        return asyncio.run(cls._async_enrich_inventory(stuff))
+        """
+        certain details of stuff are only accessible after visiting
+        their unique URL (rather than simply scraping it from the listings page).
+
+        the Coordinates and Image Urls are all "enriched"
+
+        Because this function makes between 1 and 120 requests, it's executed
+        asynchronously with asyncio.
+        """
+        return asyncio.run(cls._async_enrich_inventory(stuff))  # type: ignore
 
     @classmethod
     async def async_details(cls, url, session):
