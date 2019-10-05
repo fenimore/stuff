@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 import unittest
+from unittest import skip
 from unittest.mock import patch
 import configparser
 
@@ -35,17 +36,19 @@ class EmitterTestCase(unittest.TestCase):
             coordinates=None, image_urls=None,
         )
 
-    def _patched_post_update(self, message):
+    def _patched_post_update(self, message, media=None, longitude=None, latitude=None):
         return Status(id=123, user="myscreenname", created_at=datetime(2019, 4, 20), text=message)
 
     @patch.object(Api, "PostUpdate", _patched_post_update)
     def test_emit_tweet_success(self):
+        "Twitter doesn't provide a sandbox api, and so this little patch is how I'm testing the emission..."
         status = self.tweet_emitter.emit(self.stuff)
 
         self.assertEqual(status.user, "myscreenname")
         self.assertEqual(status.id, 123)
         self.assertEqual(status.text, "Furniture for 0 at Clinton Hill. Click https://somewhere.com/ for more details")
 
+    @skip("CI doesn't have the .secrets for twilio sandbox test credentials")
     def test_emit_sms_success(self):
         message = self.sms_emitter.emit(self.stuff)
         self.assertEqual(message.status, "queued")

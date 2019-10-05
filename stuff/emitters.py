@@ -11,12 +11,19 @@ class Emitter(abc.ABC):
     def emit(self, stuff: Stuff):
         pass
 
+    @abc.abstractmethod
+    def log(self, status) -> str:
+        pass
+
 
 @attr.s
 class EmitStdout(Emitter):
     def emit(self, stuff) -> str:
         print("New Stuff: {}".format(stuff.title))
         return "stdout: success"
+
+    def log(self, result: str) -> str:
+        return result
 
 
 @attr.s
@@ -40,8 +47,13 @@ class EmitSms(Emitter):
             to=self.to_phone,
 
         )
-        # NOTE: wtf is the twilio api and where are the docs
+        # NOTE: wtf is the twilio python api and where are the docs
         return message
+
+    def log(self, message) -> str:
+        return "SMS<sid:{} error_code:{} price:{} status:{}>".format(
+            message.sid, message.error_code, message.price or 0, message.status,
+        )
 
 
 @attr.s
@@ -57,5 +69,13 @@ class EmitTweet(Emitter):
         message_body = "{} for {} at {}. Click {} for more details".format(
             stuff.title, stuff.price, stuff.neighborhood, stuff.url,
         )
-        status = self.twitter_api.PostUpdate(message_body)
+        status = self.twitter_api.PostUpdate(
+            message_body,
+            media=stuff.image_urls,
+            longitude=stuff.coordinates.longitude if stuff.coordinates else None,
+            latitude=stuff.coordinates.latitude if stuff.coordinates else None,
+        )
         return status
+
+    def log(self, status) -> str:
+        return "Tweet<id:{} user:{}>".format(status.id, status.user)

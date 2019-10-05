@@ -19,7 +19,7 @@ class StatefulClient:
     search: Search = attr.ib()
     emitter: Emitter = attr.ib()
     sleep_seconds: int = attr.ib()
-    log: Logger = attr.ib()
+    logger: Logger = attr.ib()
 
     @classmethod
     def new(cls, db_path="sqlite://", search=Search(), emitter=EmitStdout(), sleep_seconds=3000, log_level="INFO"):
@@ -47,45 +47,51 @@ class StatefulClient:
         self.db_client.drop_db()
         self.db_client.create_db()
 
-    def populate_db(self, set_delivered=False):
+    def populate_db(self, set_delivered=False, enrich_inventory=False):
         """
         populate_db will set all the stuff objects to delivered
         so that when the loop begins, there is no "catch up"
         or waterfall of emissions.
+
+        the flag for enriching_inventory should be used if emitting
+        using a media-ready emission API (not stdout or sms) like twitter
         """
-        for item in self.search.get_inventory():
-            # TODO: replace is try catch exception?
+        inventory = self.search.get_inventory()
+        if enrich_inventory:
+            inventory = Search.enrich_inventory(inventory)
+
+        for item in inventory:
             if not self.db_client.get_stuff_by_url(item.url):
                 item.delivered = set_delivered
                 self.db_client.insert_stuff(item)
-                self.log.info("Added delivered: {} item: {}".format(item.delivered, item.title))
+                self.logger.info("Added delivered: {} item: {}".format(item.delivered, item.title))
 
     def deliver(self, stuff: Stuff) -> str:
         try:
             result = self.emitter.emit(stuff)
             stuff.delivered = True
             self.db_client.update_stuff(stuff)
+            self.logger.info(self.emitter.log(result))
         except EmitFailure as e:
             result = "Failure Delivering {}".format(e)
-            self.log.error(result)
+            self.logger.error(result)
         return result
 
     def loop(self):
         self.populate_db(set_delivered=True)
-        self.log.info("Starting Loop")
+        self.logger.info("Starting Loop")
         while True:
             try:
                 self.populate_db()
                 all_stuff = self.db_client.get_all_undelivered_stuff()
                 if len(all_stuff) > 0:
-                    self.log.info("Emitting: {}".format(all_stuff[0].title))
-                    result = self.deliver(all_stuff[0])
-                    self.log.info("Result: {}".format(result))
+                    self.logger.info("Emitting: {}".format(all_stuff[0].title))
+                    self.deliver(all_stuff[0])
                 else:
-                    self.log.debug("Nothing to emit")
+                    self.logger.debug("Nothing to emit")
             except Exception:
                 pass
-            self.log.debug("Sleeping {} seconds".format(self.sleep_seconds))
+            self.logger.debug("Sleeping {} seconds".format(self.sleep_seconds))
             time.sleep(self.sleep_seconds)
 
 
@@ -97,16 +103,9 @@ if __name__ == "__main__":
     config = configparser.ConfigParser()
     config.read(args.secrets)
 
-    emitter = EmitSms.new(
-        account_sid=config["twilio-test"]["account_sid"],
-        auth_token=config["twilio-test"]["auth_token"],
-        from_phone=config["twilio-test"]["from_phone"],
-        to_phone=config["twilio-test"]["to_phone"],
-    )
-
-    emitter = EmitStdout()
     sleep_time = int(config["app"]["sleep"])
     log_level = config["app"]["log"]
+
     client = StatefulClient.new(
         db_path="sqlite:///stuff.db",
         search=Search(
@@ -116,12 +115,17 @@ if __name__ == "__main__":
             query="rug",
             proximinity=Proximinity(3, "11238"),
         ),
-        emitter=emitter,
+        emitter=EmitSms.new(
+            account_sid=config["twilio-test"]["account_sid"],
+            auth_token=config["twilio-test"]["auth_token"],
+            from_phone=config["twilio-test"]["from_phone"],
+            to_phone=config["twilio-test"]["to_phone"],
+        ),
         sleep_seconds=sleep_time,
         log_level=log_level,
     )
 
-    client.refresh()
+    client.refresh()  # delete old DB...
     client.setup()
     try:
         client.loop()
