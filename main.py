@@ -23,6 +23,12 @@ welcome_message = """
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--secrets", default=".secrets")
+    parser.add_argument("--region", default="new_york_city")
+    parser.add_argument("--area", default="brooklyn")
+    parser.add_argument("--category", default="furniture")
+    parser.add_argument("--query", default=None)
+    parser.add_argument("--zip")
+    parser.add_argument("--distance", type=int, default=2)
     args = parser.parse_args()
 
     config = configparser.ConfigParser()
@@ -34,11 +40,11 @@ if __name__ == "__main__":
     client = StatefulClient.new(
         db_path="sqlite:///stuff.db",
         search=Search(
-            region=Region.new_york_city,
-            area=Area.brooklyn,
-            category=Category.furniture,
-            query="rug",
-            proximinity=Proximinity(3, "11238"),
+            region=Region[args.region],
+            area=Area[args.area],
+            category=Category[args.category],
+            query=args.query,
+            proximinity=Proximinity(args.distance, args.zip) if args.zip else None,
         ),
         emitter=EmitSms.new(
             account_sid=config["twilio-test"]["account_sid"],
@@ -50,10 +56,10 @@ if __name__ == "__main__":
         log_level=log_level,
     )
 
-    client.refresh()  # delete old DB...
+    client.refresh()
     client.setup()
     try:
         client.loop()
     except KeyboardInterrupt:
-        client.log.info("Interrupted the loop with keyboard")
+        client.logger.info("Interrupted the loop with keyboard")
         sys.exit(0)

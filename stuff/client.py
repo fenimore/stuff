@@ -40,7 +40,8 @@ class StatefulClient:
         default sleep time is 3,000 seconds
         """
         logger = logging.getLogger("stufflog")
-        logging.basicConfig(level=log_level)
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s:%(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+        print(logger.getEffectiveLevel())
 
         db = DBClient.new(db_path)
         return cls(db, search, emitter, sleep_seconds, logger)
@@ -88,12 +89,12 @@ class StatefulClient:
             self.logger.error(result)
         return result
 
-    def loop(self):
-        self.populate_db(set_delivered=True)
+    def loop(self, with_media=False):
+        self.populate_db(set_delivered=True, enrich_inventory=with_media)
         self.logger.info("Starting Loop")
         while True:
             try:
-                self.populate_db()
+                self.populate_db(enrich_inventory=with_media)
                 all_stuff = self.db_client.get_all_undelivered_stuff()
                 if len(all_stuff) > 0:
                     self.logger.info("Emitting: {}".format(all_stuff[0].title))
