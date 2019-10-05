@@ -1,19 +1,9 @@
-from typing import List, ValuesView, Optional
 import attr
-import os
 
 from stuff.core import Stuff
 
 from twilio.rest import Client
 
-
-# import configparser
-# config = configparser.ConfigParser()
-# config.read(".secrets")
-# account_sid = config["twilio"]["account_sid"]
-# auth_token = config["twilio"]["auth_token"]
-# phone_number = config["twilio"]["phone_number"]
-# client = Client(account_sid, auth_token)
 
 @attr.s
 class EmitSms:
