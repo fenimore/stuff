@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 import attr
 from datetime import datetime
 from stuff.core import Coordinates, Stuff as ApiStuff
@@ -99,7 +99,7 @@ class DBClient:
             ).order_by(DBStuff.time.desc()).all()
             return [stuff.to_api_model() for stuff in undelivered]
 
-    def get_stuff_by_id(self, _id) -> ApiStuff:
+    def get_stuff_by_id(self, _id) -> Optional[ApiStuff]:
         with self.db_connection() as session:
             stuff = session.query(DBStuff).get(_id)
             if stuff:
@@ -107,7 +107,7 @@ class DBClient:
             else:
                 return None
 
-    def get_stuff_by_url(self, url) -> ApiStuff:
+    def get_stuff_by_url(self, url) -> Optional[ApiStuff]:
         with self.db_connection() as session:
             db_stuff = session.query(DBStuff).filter_by(url=url).one_or_none()
             if db_stuff:

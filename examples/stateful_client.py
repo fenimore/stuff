@@ -5,14 +5,14 @@ import attr
 from stuff.core import Stuff, EmitFailure
 from stuff.constants import Area, Region, Category
 from stuff.search import Search, Proximinity
-from stuff.db import DBClient, DBStuff
+from stuff.db import DBClient
 from stuff.emit_sms import EmitSms
 from stuff.emit_twitter import EmitTweet
 
 
 class EmitStdout:
     def emit(self, stuff) -> str:
-        print(stuff.title)
+        print("New Stuff: {}".format(stuff.title))
         return "print success"
 
 
@@ -21,7 +21,7 @@ class StatefulClient:
     db_client: DBClient = attr.ib()
     search: Search = attr.ib()
     emitter = attr.ib()  # interface Emitter... TODO: zope
-    sleep_seconds = attr.ib()
+    sleep_seconds: int = attr.ib()
 
     @classmethod
     def new(cls, db_path="sqlite://", search=Search(), emitter=EmitStdout(), sleep_seconds=3000):
@@ -46,11 +46,17 @@ class StatefulClient:
         self.db_client.drop_db()
         self.db_client.create_db()
 
-    def populate_db(self):
+    def populate_db(self, set_all_to_delivered=True):
+        """
+        populate_db sets all the stuff objects to delivered
+        so that when the loop begins, there is no "catch up"
+        or waterfall of emissions.
+        """
         for item in self.search.get_inventory():
-            stuff = DBStuff.from_api_model(item)
-            if not self.db_client.get_stuff_by_url(stuff.url):
-                self.db_client.insert_stuff(stuff)
+            # TODO: repalce is try catch exception?
+            if not self.db_client.get_stuff_by_url(item.url):
+                item.delivered = set_all_to_delivered
+                self.db_client.insert_stuff(item)
 
     def deliver(self, stuff: Stuff) -> str:
         try:
@@ -64,15 +70,21 @@ class StatefulClient:
     def loop(self):
         # TODO: send all undelivered?
         # configure that somehow?
+        # ATM this is dumb, it'll send things backwards..
         while True:  # TODO: interrupt ctrl-c?
+            print("Running Loop")
             try:
                 self.populate_db()
                 all_stuff = self.db_client.get_all_undelivered_stuff()
                 if len(all_stuff) > 0:
+                    print("Emitting")
                     result = self.deliver(all_stuff[0])
-                    print(result)  # TODO: add loggin
+                    print(result)  # TODO: add logging
+                else:
+                    print("Nothing to emit")
             except Exception:
                 pass
+            print("Sleeping {} seconds".format(self.sleep_seconds))
             time.sleep(self.sleep_seconds)
 
 
@@ -84,33 +96,33 @@ if __name__ == "__main__":
     config = configparser.ConfigParser()
     config.read(args.secrets)
 
-    sms_emitter = EmitSms.new(
-        account_sid=config["twilio"]["account_sid"],
-        auth_token=config["twilio"]["auth_token"],
-        from_phone=config["twilio"]["from_phone"],
-        to_phone=config["twilio"]["to_phone"],
-    )
-    tweet_emitter= EmitTweet.new(
-        consumer_key=config["twitter"]["consumer_key"],
-        consumer_secret=config["twitter"]["consumer_secret"],
-        access_token_key=config["twitter"]["access_token_key"],
-        access_token_secret=config["twitter"]["access_token_secret"],
-    )
-    print(tweet_emitter)
+    # emitter = EmitSms.new(
+    #     account_sid=config["twilio"]["account_sid"],
+    #     auth_token=config["twilio"]["auth_token"],
+    #     from_phone=config["twilio"]["from_phone"],
+    #     to_phone=config["twilio"]["to_phone"],
+    # )
+    # emitter = EmitTweet.new(
+    #     consumer_key=config["twitter"]["consumer_key"],
+    #     consumer_secret=config["twitter"]["consumer_secret"],
+    #     access_token_key=config["twitter"]["access_token_key"],
+    #     access_token_secret=config["twitter"]["access_token_secret"],
+    # )
+    emitter = EmitStdout()
+    sleep_time = int(config["app"]["sleep"])
 
-    client = StatefulClient.new("sqlite:///stuff.db")
+    client = StatefulClient.new(
+        db_path="sqlite:///stuff.db",
+        search=Search(
+            region=Region.new_york_city,
+            area=Area.brooklyn,
+            category=Category.furniture,
+            query="rug",
+            proximinity=Proximinity(3, "11238"),
+        ),
+        emitter=emitter,
+        sleep_seconds=sleep_time,
+    )
+    client.refresh()
     client.setup()
-    client.query(
-        region=Region.new_york_city,
-        area=Area.brooklyn,
-        category=Category.furniture,
-        keyword=None,
-        proximinity=Proximinity(3, "11238"),
-    )
-    client.populate_db()
-    all_stuff = client.db_client.get_all_stuff()
-
-    for idx, stuff in enumerate(all_stuff[0:10]):
-        print(f"{idx}: {stuff.title}")
-    print(f"Length: {len(all_stuff)}")
-    print(len(all_stuff))
+    client.loop()
