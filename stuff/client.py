@@ -3,7 +3,7 @@ import attr
 import logging
 from logging import Logger
 
-from stuff.core import Stuff, EmitFailure
+from stuff.core import Stuff
 from stuff.constants import Area, Region, Category
 from stuff.search import Search, Proximinity
 from stuff.db import DBClient
@@ -39,9 +39,12 @@ class StatefulClient:
         default emitter is stdout
         default sleep time is 3,000 seconds
         """
-        logger = logging.getLogger("stufflog")
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s:%(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-        print(logger.getEffectiveLevel())
+        logger = logging.getLogger("stufflib")
+        logging.basicConfig(
+            level=log_level,
+            format='%(asctime)s %(name)s %(levelname)s: %(message)s',
+            datefmt='%m/%d/%y %H:%M:%S',
+        )
 
         db = DBClient.new(db_path)
         return cls(db, search, emitter, sleep_seconds, logger)
@@ -76,7 +79,7 @@ class StatefulClient:
             if not self.db_client.get_stuff_by_url(item.url):
                 item.delivered = set_delivered
                 self.db_client.insert_stuff(item)
-                self.logger.info("Added delivered: {} item: {}".format(item.delivered, item.title))
+                self.logger.info("insert {}".format(item.title))
 
     def deliver(self, stuff: Stuff) -> str:
         try:
@@ -84,7 +87,7 @@ class StatefulClient:
             stuff.delivered = True
             self.db_client.update_stuff(stuff)
             self.logger.info(self.emitter.log(result))
-        except EmitFailure as e:
+        except Exception as e:
             result = "Failure Delivering {}".format(e)
             self.logger.error(result)
         return result
@@ -101,7 +104,7 @@ class StatefulClient:
                     self.deliver(all_stuff[0])
                 else:
                     self.logger.debug("Nothing to emit")
-            except Exception:
-                pass
+            except Exception as e:
+                self.logger.error("Exception in main loop {}".format(e))
             self.logger.debug("Sleeping {} seconds".format(self.sleep_seconds))
             time.sleep(self.sleep_seconds)

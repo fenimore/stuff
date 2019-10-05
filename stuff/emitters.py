@@ -6,6 +6,10 @@ from twitter import Api, Status
 from twilio.rest import Client
 
 
+class EmitFailure(Exception):
+    pass
+
+
 class Emitter(abc.ABC):
     @abc.abstractmethod
     def emit(self, stuff: Stuff):
