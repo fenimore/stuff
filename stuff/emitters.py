@@ -70,9 +70,12 @@ class EmitTweet(Emitter):
         return cls(api)
 
     def emit(self, stuff: Stuff) -> Status:
-        message_body = "{} for {}$ at {}. Click {} for more details".format(
+        message_body = "{} for {}$!!! at {}.\nClick {} for more details".format(
             stuff.title, stuff.price, stuff.neighborhood, stuff.url,
         )
+        if len(message_body) - len(stuff.url) > 280:
+            message_body = message_body[:280]
+
         status = self.twitter_api.PostUpdate(
             message_body,
             media=stuff.image_urls or None,

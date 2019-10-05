@@ -42,6 +42,7 @@ class EmitterTestCase(unittest.TestCase):
 
     @patch.object(Api, "PostUpdate", _patched_post_update)
     def test_emit_tweet_success(self):
+        # TODO: test when tweet is too big (title is too large)
         "Twitter doesn't provide a sandbox api, and so this little patch is how I'm testing the emission..."
         status = self.tweet_emitter.emit(self.stuff)
 
