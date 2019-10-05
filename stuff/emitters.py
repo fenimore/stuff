@@ -70,16 +70,16 @@ class EmitTweet(Emitter):
         return cls(api)
 
     def emit(self, stuff: Stuff) -> Status:
-        message_body = "{} for {} at {}. Click {} for more details".format(
+        message_body = "{} for {}$ at {}. Click {} for more details".format(
             stuff.title, stuff.price, stuff.neighborhood, stuff.url,
         )
         status = self.twitter_api.PostUpdate(
             message_body,
-            media=stuff.image_urls,
+            media=stuff.image_urls or None,
             longitude=stuff.coordinates.longitude if stuff.coordinates else None,
             latitude=stuff.coordinates.latitude if stuff.coordinates else None,
         )
         return status
 
     def log(self, status) -> str:
-        return "Tweet<id:{} user:{}>".format(status.id, status.user)
+        return "Tweet<id:{} user:{}>".format(status.id, status.user.screen_name)

@@ -77,7 +77,6 @@ if __name__ == "__main__":
         log_level=log_level,
     )
 
-    client.refresh()
     client.setup()
     try:
         client.loop(with_media=True)  # only include media if you're emitter emits the coordinates or images

@@ -87,6 +87,7 @@ class StatefulClient:
             self.logger.info("Insert: {}".format(item.title))
 
     def deliver(self, stuff: Stuff) -> str:
+        # TODO: consider... should this exception be caught here?
         try:
             result = self.emitter.emit(stuff)
             stuff.delivered = True
@@ -102,15 +103,15 @@ class StatefulClient:
         self.populate_db(set_delivered=True, enrich_inventory=with_media)
         self.logger.info("Starting Loop")
         while True:
-            try:
-                all_stuff = self.db_client.get_all_undelivered_stuff()
-                if len(all_stuff) > 0:
-                    self.logger.info("Emitting: {}".format(all_stuff[0].title))
-                    self.deliver(all_stuff[0])
-                else:
-                    self.logger.debug("Nothing to emit")
-                self.populate_db(enrich_inventory=with_media)
-            except Exception as e:
-                self.logger.error("Exception in main loop {}".format(e))
+            all_stuff = self.db_client.get_all_undelivered_stuff()
+            if len(all_stuff) > 0:
+                self.logger.info(f"Emitting {len(all_stuff)} stuff")
+                for stuff in all_stuff:
+                    self.logger.info(f"Emitting: {stuff.title}")
+                    self.deliver(stuff)
+            else:
+                self.logger.debug("Nothing to emit")
+
+            self.populate_db(enrich_inventory=with_media)
             self.logger.debug("Sleeping {} seconds".format(self.sleep_seconds))
             time.sleep(self.sleep_seconds)

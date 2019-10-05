@@ -53,7 +53,7 @@ class DBStuff(Base):  # type: ignore
             price=self.price,
             neighborhood=self.neighborhood,
             coordinates=Coordinates(longitude=self.longitude, latitude=self.latitude),
-            image_urls=[self.image_url],
+            image_urls=[] if not self.image_url else [self.image_url],
             delivered=self.delivered,
         )
 
