@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime
 
 from stuff.db import DBClient, DBStuff
-from stuff.core import Stuff
+from stuff.core import Stuff, Coordinates
 
 
 class DBClientTestCase(unittest.TestCase):
@@ -45,13 +45,17 @@ class DBClientTestCase(unittest.TestCase):
                 title="My Title", url="https://somewhere.com/",
                 time=datetime(2019, 4, 20), price=0,
                 neighborhood="Clinton Hill",
-                coordinates=None, image_urls=None,
+                coordinates=Coordinates(10.0, 10.0),
+                image_urls=["https://somewhere.com/item/1", "https://somewhere.com/item/2"],
             )
         )
-        actual = self.client.get_stuff_by_id(stuff_id)
-        self.assertEqual(actual.id, stuff_id)
-        roundtrip_stuff = DBStuff.from_api_model(actual)
-        self.assertEqual(roundtrip_stuff.id, stuff_id)
+        api_model = self.client.get_stuff_by_id(stuff_id)
+        self.assertEqual(api_model.id, stuff_id)
+        db_stuff = DBStuff.from_api_model(api_model)
+        self.assertEqual(db_stuff.id, stuff_id)
+        roundtrip_stuff = db_stuff.to_api_model()
+        # One of the urls are "lost here"
+        self.assertEqual(roundtrip_stuff.image_urls, ['https://somewhere.com/item/1'])
 
     def test_client_update_stuff(self):
         stuff_id = self.client.insert_stuff(
