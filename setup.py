@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.0.1",
     author="Fenimore Love",
     author_email="exorable.ludos@gmail.com",
-    description="A small program",
+    description="A scraper and poster of stuff",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/fenimore/stuff",
@@ -20,9 +20,9 @@ setuptools.setup(
         "beautifulsoup4",
     ],
     extras_require={
-        'testing': ["mypy", "responses"],
+        'testing': ["mypy", "responses", "aresponses", "pytest-mypy"],
         'dev': ["jupyter"],
-        'stateful_client': ["sqlalchemy"],
+        'db': ["sqlalchemy"],
         'sms': ["twilio"],
         'twitter': ["python-twitter"],
     },
@@ -31,5 +31,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
 )

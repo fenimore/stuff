@@ -14,4 +14,5 @@ responses
 mypy
 pytest-mypy
 
+# DB/stateful client
 sqlalchemy
