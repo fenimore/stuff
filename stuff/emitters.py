@@ -1,3 +1,4 @@
+import abc
 import attr
 from stuff.core import Stuff
 
@@ -5,15 +6,21 @@ from twitter import Api, Status
 from twilio.rest import Client
 
 
+class Emitter(abc.ABC):
+    @abc.abstractmethod
+    def emit(self, stuff: Stuff):
+        pass
+
+
 @attr.s
-class EmitStdout:
+class EmitStdout(Emitter):
     def emit(self, stuff) -> str:
         print("New Stuff: {}".format(stuff.title))
         return "stdout: success"
 
 
 @attr.s
-class EmitSms:
+class EmitSms(Emitter):
     twilio_client: Client = attr.ib()
     from_phone: str = attr.ib()
     to_phone: str = attr.ib()
@@ -38,7 +45,7 @@ class EmitSms:
 
 
 @attr.s
-class EmitTweet:
+class EmitTweet(Emitter):
     twitter_api: Api = attr.ib()
 
     @classmethod

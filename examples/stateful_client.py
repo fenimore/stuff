@@ -10,15 +10,14 @@ from stuff.core import Stuff, EmitFailure
 from stuff.constants import Area, Region, Category
 from stuff.search import Search, Proximinity
 from stuff.db import DBClient
-from stuff.emit_sms import EmitSms
-# from stuff.emit_twitter import EmitTweet
+from stuff.emitters import EmitSms, Emitter, EmitStdout
 
 
 @attr.s
 class StatefulClient:
     db_client: DBClient = attr.ib()
     search: Search = attr.ib()
-    emitter = attr.ib()  # interface Emitter... TODO: zope
+    emitter: Emitter = attr.ib()
     sleep_seconds: int = attr.ib()
     log: Logger = attr.ib()
 
