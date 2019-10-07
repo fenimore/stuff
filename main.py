@@ -52,7 +52,7 @@ if __name__ == "__main__":
     )
 
     config = configparser.ConfigParser()
-    config.read(args.secrets)
+    config.read(args.config)
 
     sleep_time = int(config["app"]["sleep"])
     log_level = config["app"]["log"]
