@@ -33,7 +33,7 @@ emitter:  {}
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--secrets", default=".secrets")
+    parser.add_argument("--config", default=".secrets")
     parser.add_argument("--region", default="new_york_city")
     parser.add_argument("--area", default="brooklyn")
     parser.add_argument("--category", default="furniture")
@@ -47,7 +47,7 @@ if __name__ == "__main__":
         welcome_message.format(
             args.region, args.area, args.category,
             args.query, args.distance if args.zip else "", args.zip,
-            args.db_path, "twitter" if args.sms else "sms",
+            args.db_path, "sms" if args.sms else "twitter",
         )
     )
 
