@@ -42,7 +42,7 @@ class EmitSms(Emitter):
         return cls(client, from_phone, to_phone)
 
     def emit(self, stuff: Stuff):  # returns wtf that Message object is...
-        message_body = "URGENT! ATTENTION! {} for {} at {}. Click {} for more details".format(
+        message_body = "URGENT! ATTENTION! {} for {} in {}. Click {} for more details".format(
             stuff.title, stuff.price, stuff.neighborhood, stuff.url,
         )
         message = self.twilio_client.messages.create(
@@ -70,7 +70,7 @@ class EmitTweet(Emitter):
         return cls(api)
 
     def emit(self, stuff: Stuff) -> Status:
-        message_body = "{} for {}$!!! at {}.\nClick {} for more details".format(
+        message_body = "{} for {}$!!! in {}.\n{} for details #freestuff".format(
             stuff.title, stuff.price, stuff.neighborhood, stuff.url,
         )
         if len(message_body) - len(stuff.url) > 280:

@@ -103,15 +103,16 @@ class StatefulClient:
         self.populate_db(set_delivered=True, enrich_inventory=with_media)
         self.logger.info("Starting Loop")
         while True:
+            self.populate_db(enrich_inventory=with_media)
+
             all_stuff = self.db_client.get_all_undelivered_stuff()
             if len(all_stuff) > 0:
                 self.logger.info(f"Emitting {len(all_stuff)} stuff")
-                for stuff in all_stuff:
+                for stuff in all_stuff:  # TODO: reverse list?
                     self.logger.info(f"Emitting: {stuff.title}")
                     self.deliver(stuff)
             else:
                 self.logger.debug("Nothing to emit")
 
-            self.populate_db(enrich_inventory=with_media)
             self.logger.debug("Sleeping {} seconds".format(self.sleep_seconds))
             time.sleep(self.sleep_seconds)

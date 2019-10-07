@@ -25,6 +25,7 @@ setuptools.setup(
         'db': ["sqlalchemy"],
         'sms': ["twilio"],
         'twitter': ["python-twitter"],
+        'client': ["sqlalchemy", "python-twitter", "twilio"]
     },
     classifiers=[
         "Programming Language :: Python :: 3",
