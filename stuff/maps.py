@@ -22,7 +22,8 @@ import tempfile
 import attr
 from geopy.geocoders import Nominatim
 from bs4 import BeautifulSoup
-import requests, folium, webbrowser
+import requests
+import folium
 from folium import CssLink
 
 

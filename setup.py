@@ -25,12 +25,13 @@ setuptools.setup(
         'db': ["sqlalchemy"],
         'sms': ["twilio"],
         'twitter': ["python-twitter"],
-        'client': ["sqlalchemy", "python-twitter", "twilio"]
+        'client': ["sqlalchemy", "python-twitter", "twilio"],
+        'map': ["folium", "geopy"],
     },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.7',
+    python_requires='>=3.4',
 )
