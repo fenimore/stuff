@@ -1,7 +1,6 @@
 from typing import List, Optional
 import attr
 from datetime import datetime
-from stuff.core import Coordinates, Stuff as ApiStuff
 
 from contextlib import contextmanager
 
@@ -12,6 +11,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.engine import Engine
 from sqlalchemy import Column, Integer, String, DateTime, Float, Boolean
 
+from stuff.core import Coordinates, Stuff as ApiStuff
+from stuff.constants import Region
 
 Base = declarative_base()
 
@@ -24,6 +25,7 @@ class DBStuff(Base):  # type: ignore
     price = Column('price', Integer)
     time = Column('time', DateTime)
     neighborhood = Column("neighborhood", String)
+    city = Column("city", String)
     longitude = Column('longititude', Float)
     latitude = Column('latitude', Float)
     image_url = Column('image_url', String)  # TODO: use relation to make image_urls
@@ -38,6 +40,7 @@ class DBStuff(Base):  # type: ignore
             time=stuff.time,
             price=stuff.price,
             neighborhood=stuff.neighborhood,
+            city=stuff.city.value,
             longitude=stuff.coordinates.longitude if stuff.coordinates else None,
             latitude=stuff.coordinates.latitude if stuff.coordinates else None,
             image_url=stuff.image_urls[0] if stuff.image_urls else None,
@@ -52,6 +55,7 @@ class DBStuff(Base):  # type: ignore
             time=self.time,
             price=self.price,
             neighborhood=self.neighborhood,
+            city=Region(self.city),
             coordinates=Coordinates(longitude=self.longitude, latitude=self.latitude),
             image_urls=[] if not self.image_url else [self.image_url],
             delivered=self.delivered,
@@ -91,6 +95,18 @@ class DBClient:
             all_stuff = session.query(DBStuff).order_by(DBStuff.time.desc()).all()
             return [stuff.to_api_model() for stuff in all_stuff]
 
+    def get_some_stuff(self, location, limit) -> List[ApiStuff]:
+        """get_some_stuff returns some of the stuff ordered recent -> oldest"""
+        with self.db_connection() as session:
+            some_stuff = session.query(
+                DBStuff
+            ).filter(
+                DBStuff.city == location
+            ).order_by(
+                DBStuff.time.desc()
+            ).all()[:limit]
+            return [stuff.to_api_model() for stuff in some_stuff]
+
     def get_all_undelivered_stuff(self) -> List[ApiStuff]:
         """get_all_undelivered_stuff returns all the stuff ordered recent -> oldest"""
         with self.db_connection() as session:
@@ -123,6 +139,7 @@ class DBClient:
             stuff.time = db_stuff.time
             stuff.price = db_stuff.price
             stuff.neighborhood = db_stuff.neighborhood
+            stuff.city = db_stuff.city
             stuff.longitude = db_stuff.longitude
             stuff.latitude = db_stuff.latitude
             stuff.image_url = db_stuff.image_url

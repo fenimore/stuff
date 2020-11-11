@@ -62,6 +62,9 @@ class StatefulClient:
         self.db_client.drop_db()
         self.db_client.create_db()
 
+    def select_stuff(self, location, limit):
+        return self.db_client.get_some_stuff(location, limit)
+
     def populate_db(self, set_delivered=False, enrich_inventory=False):
         """
         populate_db will set all the stuff objects to delivered

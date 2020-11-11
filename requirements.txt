@@ -16,3 +16,7 @@ pytest-mypy
 
 # DB/stateful client
 sqlalchemy
+
+# maps
+geopy
+folium

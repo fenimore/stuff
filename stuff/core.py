@@ -25,6 +25,7 @@ class Stuff:
     time: datetime = attr.ib()
     price: int = attr.ib(converter=_strip_currency)
     neighborhood: str = attr.ib()
+    city: str = attr.ib(default=None)
     image_urls: List[str] = attr.ib(default=None)
     coordinates: Coordinates = attr.ib(default=None)
     delivered: bool = attr.ib(default=False)

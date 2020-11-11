@@ -16,7 +16,7 @@ class DBClientTestCase(unittest.TestCase):
             Stuff(
                 title="My Title", url="https://somewhere.com/",
                 time=datetime(2019, 4, 20), price=0,
-                neighborhood="Clinton Hill",
+                neighborhood="Clinton Hill", city="newyork",
                 coordinates=None, image_urls=None,
             )
         )

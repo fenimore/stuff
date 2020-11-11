@@ -64,8 +64,20 @@ class Search:
         inventory = []
         for list_item in ul.find_all("li"):
             stuff = Stuff.parse_item(list_item)
+            stuff.city = self.region
             inventory.append(stuff)
         return inventory
+
+    def get_enriched_inventory(self) -> List[Stuff]:
+        soup = BeautifulSoup(self.get_text(), features="html.parser")
+        ul = soup.find("ul", {"class": "rows"})
+        inventory = []
+        for list_item in ul.find_all("li"):
+            stuff = Stuff.parse_item(list_item)
+            stuff.city = self.region
+            inventory.append(stuff)
+
+        return self.enrich_inventory(inventory)
 
     @classmethod
     def enrich_inventory(cls, stuff: List[Stuff]) -> List[Stuff]:

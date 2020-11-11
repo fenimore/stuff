@@ -7,7 +7,7 @@ import pytest
 
 from stuff.core import Stuff, Coordinates
 from stuff.search import Search, Proximinity
-from stuff.constants import Area, Category
+from stuff.constants import Area, Category, Region
 from stuff.tests.utils import _data
 
 
@@ -47,7 +47,6 @@ class SearchTestCase(unittest.TestCase):
 <!DOCTYPE html>
 <html class="no-js"><head>
     <title>new york free stuff  - craigslist</title>""", text[:95])
-        self.assertEqual(289394, len(text))
 
     @responses.activate
     def test_search_get_inventory(self):
@@ -60,6 +59,7 @@ class SearchTestCase(unittest.TestCase):
             time=datetime(2019, 9, 15, 12, 15),
             price=0,
             neighborhood='Ditmas Park Area, Brooklyn',
+            city=Region("newyork"),
             image_urls=None,
             coordinates=None,
         )
