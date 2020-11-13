@@ -56,7 +56,7 @@ class Stuff:
         return d
 
     @classmethod
-    def parse_item(cls, tag: Tag):
+    def parse_item(cls, tag: Tag, city):
         """
         parse the <li> tag and return the Stuff
         """
@@ -67,7 +67,7 @@ class Stuff:
         price = tag.find("span", {"class": "result-price"}).text.strip("$")
         hood_tag = tag.find("span", {"class": "result-hood"})
         hood = hood_tag.text.strip(" ()") if hood_tag else None
-        return cls(url=url, title=title, time=time, price=price, neighborhood=hood, city=None)
+        return cls(url=url, title=title, time=time, price=price, neighborhood=hood, city=city)
 
     def parse_details(self, page: Tag):
         """

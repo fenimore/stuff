@@ -10,14 +10,14 @@ from stuff.tests.utils import _data
 class StuffTestCase(unittest.TestCase):
     def test_stuff_parse_item(self):
         list_item = BeautifulSoup(_data("zip_list_item.html"), features="html.parser")
-        stuff = Stuff.parse_item(list_item)
+        stuff = Stuff.parse_item(list_item, "newyork")
         expected = Stuff(
             url="https://newyork.craigslist.org/brk/zip/d/free-boxes-and-packing-supplies/6978063787.html",
             title="FREE BOXES and PACKING SUPPLIES",
             time=datetime(2019, 9, 13, 16, 31),
             price=0,
             neighborhood="Clinton Hill",
-            city=None,
+            city="newyork",
         )
         self.assertEqual(stuff, expected)
 

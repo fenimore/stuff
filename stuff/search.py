@@ -63,7 +63,7 @@ class Search:
         ul = soup.find("ul", {"class": "rows"})
         inventory = []
         for list_item in ul.find_all("li"):
-            stuff = Stuff.parse_item(list_item)
+            stuff = Stuff.parse_item(list_item, self.region.value)
             stuff.city = self.region
             inventory.append(stuff)
         return inventory
