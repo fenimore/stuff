@@ -40,7 +40,7 @@ class DBStuff(Base):  # type: ignore
             time=stuff.time,
             price=stuff.price,
             neighborhood=stuff.neighborhood,
-            city=stuff.city.value,
+            city=stuff.city,
             longitude=stuff.coordinates.longitude if stuff.coordinates else None,
             latitude=stuff.coordinates.latitude if stuff.coordinates else None,
             image_url=stuff.image_urls[0] if stuff.image_urls else None,
@@ -139,7 +139,7 @@ class DBClient:
             stuff.time = db_stuff.time
             stuff.price = db_stuff.price
             stuff.neighborhood = db_stuff.neighborhood
-            stuff.city = db_stuff.city
+            stuff.city = db_stuff.city.value
             stuff.longitude = db_stuff.longitude
             stuff.latitude = db_stuff.latitude
             stuff.image_url = db_stuff.image_url

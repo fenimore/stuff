@@ -17,6 +17,7 @@ class StuffTestCase(unittest.TestCase):
             time=datetime(2019, 9, 13, 16, 31),
             price=0,
             neighborhood="Clinton Hill",
+            city=None,
         )
         self.assertEqual(stuff, expected)
 
@@ -27,6 +28,7 @@ class StuffTestCase(unittest.TestCase):
             time=datetime(2019, 9, 13, 16, 31),
             price=0,
             neighborhood="Clinton Hill",
+            city="newyork",
         )
         item_page = BeautifulSoup(_data("craigslist_zip_item_page.html"), features="html.parser")
         stuff.parse_details(item_page)
@@ -38,5 +40,6 @@ class StuffTestCase(unittest.TestCase):
             neighborhood="Clinton Hill",
             coordinates=Coordinates(longitude='-73.957000', latitude='40.646700'),
             image_urls=['https://images.craigslist.org/00L0L_5e2M7zY0JYR_600x450.jpg'],
+            city="newyork",
         )
         self.assertEqual(stuff, expected)

@@ -83,17 +83,17 @@ class SearchTestCase(unittest.TestCase):
 async def test_async_search_enrich_inventory(aresponses):
     inventory = [
         Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-free-insulation/6977996917.html',
-              title='FREE Insulation', time=datetime(2019, 9, 13, 15, 24), price=0,
+              title='FREE Insulation', time=datetime(2019, 9, 13, 15, 24), price=0, city="newyork",
               neighborhood='Bay Ridge, Brooklyn', image_urls=None, coordinates=None),
         Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-large-navy-blue-area-rug-10-14/6977979965.html',
-              title='Large navy blue area rug 10â\x80\x99 x 14â\x80\x99', time=datetime(2019, 9, 13, 14, 59),
+              title='Large navy blue area rug 10â\x80\x99 x 14â\x80\x99', time=datetime(2019, 9, 13, 14, 59), city="newyork",
               price=0, neighborhood='Greenpoint, Brooklyn', image_urls=None, coordinates=None),
         Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-10-foot-round-pool/6977959276.html',
               title='10 foot round pool', time=datetime(2019, 9, 13, 14, 38), price=0, neighborhood='bklyn',
-              image_urls=None, coordinates=None),
+              image_urls=None, coordinates=None, city="newyork"),
         Stuff(url='https://newyork.craigslist.org/brk/zip/d/brooklyn-microwave-popcorn-bags-free/6977920662.html',
               title='MICROWAVE POPCORN --- 8 BAGS --- FREE', time=datetime(2019, 9, 13, 13, 58), price=0,
-              neighborhood='Bay Ridge', image_urls=None, coordinates=None),
+              city="newyork", neighborhood='Bay Ridge', image_urls=None, coordinates=None),
     ]
     aresponses.add(
         "newyork.craigslist.org", re.compile(r"\/brk\/zip\/d\/brooklyn-free-insulation[^.]+\.html"),
@@ -117,6 +117,7 @@ async def test_async_search_enrich_inventory(aresponses):
         time=datetime(2019, 9, 13, 15, 24),
         price=0,
         neighborhood='Bay Ridge, Brooklyn',
+        city="newyork",
         image_urls=['https://images.craigslist.org/00L0L_5e2M7zY0JYR_600x450.jpg'],
         coordinates=Coordinates(longitude='-73.957000', latitude='40.646700')
     )

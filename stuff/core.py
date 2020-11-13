@@ -25,7 +25,7 @@ class Stuff:
     time: datetime = attr.ib()
     price: int = attr.ib(converter=_strip_currency)
     neighborhood: str = attr.ib()
-    city: str = attr.ib(default=None)
+    city: str = attr.ib()
     image_urls: List[str] = attr.ib(default=None)
     coordinates: Coordinates = attr.ib(default=None)
     delivered: bool = attr.ib(default=False)
@@ -67,7 +67,7 @@ class Stuff:
         price = tag.find("span", {"class": "result-price"}).text.strip("$")
         hood_tag = tag.find("span", {"class": "result-hood"})
         hood = hood_tag.text.strip(" ()") if hood_tag else None
-        return cls(url=url, title=title, time=time, price=price, neighborhood=hood)
+        return cls(url=url, title=title, time=time, price=price, neighborhood=hood, city=None)
 
     def parse_details(self, page: Tag):
         """

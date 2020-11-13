@@ -31,9 +31,14 @@ class StatefulClient:
     emitter: Emitter = attr.ib()
     sleep_seconds: int = attr.ib()
     logger: Logger = attr.ib()
+    proxy: str = attr.ib()
 
     @classmethod
-    def new(cls, db_path="sqlite://", search=Search(), emitter=EmitStdout(), sleep_seconds=3000, log_level="INFO"):
+    def new(
+            cls, db_path="sqlite://", search=Search(),
+            emitter=EmitStdout(), sleep_seconds=3000,
+            log_level="INFO", proxy=None,
+    ):
         """
         default sqlite db is in-memory
         default emitter is stdout
@@ -47,7 +52,7 @@ class StatefulClient:
         )
 
         db = DBClient.new(db_path)
-        return cls(db, search, emitter, sleep_seconds, logger)
+        return cls(db, search, emitter, sleep_seconds, logger, proxy)
 
     def query(self, region: Region, area: Area, category: Category, keyword: str, proximinity: Proximinity):
         self.search = Search(
@@ -65,7 +70,7 @@ class StatefulClient:
     def select_stuff(self, location, limit):
         return self.db_client.get_some_stuff(location, limit)
 
-    def populate_db(self, set_delivered=False, enrich_inventory=False):
+    def populate_db(self, set_delivered=False, enrich_inventory=False, limit_enrichment=0):
         """
         populate_db will set all the stuff objects to delivered
         so that when the loop begins, there is no "catch up"
@@ -82,12 +87,17 @@ class StatefulClient:
         ]
         if enrich_inventory and new_items:
             self.logger.info(f"Enriching {len(new_items)} items")
-            new_items = Search.enrich_inventory(new_items)
+            if limit_enrichment:
+                new_items = Search.enrich_inventory(
+                    new_items[:limit_enrichment], self.proxy
+                ) + new_items[limit_enrichment:]
+            else:
+                new_items = Search.enrich_inventory(new_items)
 
+        self.logger.info("Inserting {} item".format(len(new_items)))
         for item in new_items:
             item.delivered = set_delivered
             self.db_client.insert_stuff(item)
-            self.logger.info("Insert: {}".format(item.title))
 
     def deliver(self, stuff: Stuff) -> str:
         # TODO: consider... should this exception be caught here?

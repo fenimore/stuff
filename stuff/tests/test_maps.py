@@ -16,6 +16,7 @@ class StuffCharterTestCase(unittest.TestCase):
                 time=datetime(2019, 9, 13, 13, 31),
                 price=0,
                 neighborhood="Clinton Hill",
+                city="newyork",
                 coordinates=Coordinates(longitude='-73.947000', latitude='40.546700'),
                 image_urls=['https://images.craigslist.org/someother.jpg']
             ),
@@ -24,6 +25,7 @@ class StuffCharterTestCase(unittest.TestCase):
                 title="FREE BOXES and PACKING SUPPLIES",
                 time=datetime(2019, 9, 13, 16, 31),
                 price=0,
+                city="newyork",
                 neighborhood="Clinton Hill",
                 coordinates=Coordinates(longitude='-73.957000', latitude='40.646700'),
                 image_urls=['https://images.craigslist.org/00L0L_5e2M7zY0JYR_600x450.jpg']

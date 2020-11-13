@@ -68,19 +68,12 @@ class Search:
             inventory.append(stuff)
         return inventory
 
-    def get_enriched_inventory(self) -> List[Stuff]:
-        soup = BeautifulSoup(self.get_text(), features="html.parser")
-        ul = soup.find("ul", {"class": "rows"})
-        inventory = []
-        for list_item in ul.find_all("li"):
-            stuff = Stuff.parse_item(list_item)
-            stuff.city = self.region
-            inventory.append(stuff)
-
-        return self.enrich_inventory(inventory)
+    def get_enriched_inventory(self, proxy=None) -> List[Stuff]:
+        inventory = self.get_inventory()
+        return self.enrich_inventory(inventory, proxy=proxy)
 
     @classmethod
-    def enrich_inventory(cls, stuff: List[Stuff]) -> List[Stuff]:
+    def enrich_inventory(cls, stuff: List[Stuff], proxy=None) -> List[Stuff]:
         """
         certain details of stuff are only accessible after visiting
         their unique URL (rather than simply scraping it from the listings page).
@@ -90,20 +83,20 @@ class Search:
         Because this function makes between 1 and 120 requests, it's executed
         asynchronously with asyncio.
         """
-        return asyncio.run(cls._async_enrich_inventory(stuff))  # type: ignore
+        return asyncio.run(cls._async_enrich_inventory(stuff, proxy))  # type: ignore
 
     @classmethod
-    async def async_details(cls, url, session):
-        async with session.get(url) as response:
+    async def _async_details(cls, url, session, proxy=None):
+        async with session.get(url, proxy=proxy) as response:
             return (await response.text(), url)
 
     @classmethod
-    async def _async_enrich_inventory(cls, inventory: List[Stuff]) -> ValuesView[Stuff]:
+    async def _async_enrich_inventory(cls, inventory: List[Stuff], proxy=None) -> ValuesView[Stuff]:
         tasks = []
         stuffs = {}
         async with ClientSession() as session:
             for item in inventory:
-                task = asyncio.create_task(cls.async_details(item.url, session))
+                task = asyncio.create_task(cls._async_details(item.url, session, proxy))
                 tasks.append(task)
                 stuffs[item.url] = item
             texts = await asyncio.gather(*tasks)
