@@ -1,8 +1,6 @@
 from datetime import datetime
 import unittest
 
-from bs4 import BeautifulSoup
-
 from stuff.core import Stuff, Coordinates
 from stuff.maps import Charter
 
@@ -31,6 +29,7 @@ class StuffCharterTestCase(unittest.TestCase):
                 image_urls=['https://images.craigslist.org/00L0L_5e2M7zY0JYR_600x450.jpg']
             )
         ]
+
     def test_stuff_charter(self):
 
         charter = Charter(

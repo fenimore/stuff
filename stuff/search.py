@@ -1,6 +1,8 @@
-from typing import List, ValuesView, Optional
+from functools import partial
+from typing import List, Optional
 import attr
 import os
+from multiprocessing.pool import ThreadPool
 from urllib.parse import urlencode
 
 from bs4 import BeautifulSoup
@@ -8,9 +10,6 @@ import requests
 
 from stuff.core import Stuff
 from stuff.constants import Area, Region, Category
-
-import asyncio
-from aiohttp import ClientSession
 
 
 @attr.s
@@ -64,16 +63,23 @@ class Search:
         inventory = []
         for list_item in ul.find_all("li"):
             stuff = Stuff.parse_item(list_item, self.region.value)
-            stuff.city = self.region
+            stuff.city = self.region.value
             inventory.append(stuff)
         return inventory
 
-    def get_enriched_inventory(self, proxy=None) -> List[Stuff]:
-        inventory = self.get_inventory()
-        return self.enrich_inventory(inventory, proxy=proxy)
+    @classmethod
+    def enrich_item(cls, item: Stuff, proxies: Optional[dict]):
+        text = requests.get(item.url, proxies=proxies).text
+        item.parse_details(BeautifulSoup(text, features="html.parser"))
+        return item
 
     @classmethod
-    def enrich_inventory(cls, stuff: List[Stuff], proxy=None) -> List[Stuff]:
+    def enrich_inventory(
+            cls,
+            stuff: List[Stuff],
+            proxies: Optional[dict] = None,
+            num_threads: int = 4,
+    ) -> List[Stuff]:
         """
         certain details of stuff are only accessible after visiting
         their unique URL (rather than simply scraping it from the listings page).
@@ -83,23 +89,6 @@ class Search:
         Because this function makes between 1 and 120 requests, it's executed
         asynchronously with asyncio.
         """
-        return asyncio.run(cls._async_enrich_inventory(stuff, proxy))  # type: ignore
-
-    @classmethod
-    async def _async_details(cls, url, session, proxy=None):
-        async with session.get(url, proxy=proxy) as response:
-            return (await response.text(), url)
-
-    @classmethod
-    async def _async_enrich_inventory(cls, inventory: List[Stuff], proxy=None) -> ValuesView[Stuff]:
-        tasks = []
-        stuffs = {}
-        async with ClientSession() as session:
-            for item in inventory:
-                task = asyncio.create_task(cls._async_details(item.url, session, proxy))
-                tasks.append(task)
-                stuffs[item.url] = item
-            texts = await asyncio.gather(*tasks)
-            for text, url in texts:
-                stuffs[url].parse_details(BeautifulSoup(text, features="html.parser"))
-            return stuffs.values()
+        with ThreadPool(num_threads) as p:
+            map_enrich = partial(cls.enrich_item, proxies=proxies)
+            return p.map(map_enrich, stuff)

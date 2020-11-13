@@ -16,13 +16,12 @@ Example usage:
     Craigslist denizens care not for computer-precision
 """
 from typing import List
-import os, re
+import os
+import re
 import tempfile
 
 import attr
 from geopy.geocoders import Nominatim
-from bs4 import BeautifulSoup
-import requests
 import folium
 from folium import CssLink
 
@@ -92,7 +91,7 @@ class Charter:
             )
             if not lon or not lat:
                 geolocator = Nominatim(user_agent="TreasureMap/2")
-                findit = geolocator.geocode(self.city) # Last resort
+                findit = geolocator.geocode(self.city)  # Last resort
                 lat = findit.latitude
                 lon = findit.longitude
 
@@ -147,29 +146,29 @@ class Charter:
         else:
             try:
                 geolocator = Nominatim(user_agent="TreasureMap/2")
-                findit = geolocator.geocode(self.city) # Last resort
+                findit = geolocator.geocode(self.city)  # Last resort
                 lat = findit.latitude
                 lon = findit.longitude
                 coord = [lat, lon]
-            except:
-                coord = [0,0] # This is a bit silly, null island
+            except Exception:  # TODO: find geolocator exception
+                coord = [0, 0]  # This is a bit silly, null island
         return coord
 
     def add_address(self):
         """Add address to folium map"""
-        if self.address != None:
+        if self.address is not None:
             geolocator = Nominatim(user_agent="TreasureMap/2")
             try:
                 add_lat = geolocator.geocode(self.address).latitude
                 add_lon = geolocator.geocode(self.address).longitude
-            except:
+            except Exception:
                 add_lat = 0
                 add_lon = 0
             text = self.address + str(add_lat) + str(add_lon)
             folium.Marker(
                 location=[add_lat, add_lon],
                 popup=text,
-                icon=folium.Icon(color='red',icon='home')
+                icon=folium.Icon(color='red', icon='home')
             ).add_to(self.map)
 
     def colorize(self, stuff):
@@ -184,12 +183,12 @@ class Charter:
         that order.
         """
         PATTERN_1 = "(wood|shelf|shelves|table|chair|scrap|desk|oak|pine|armoire|dresser)"
-        PATTERN_2 = "(tv|screen|écran|speakers|wire|electronic|saw|headphones|arduino|print|television)" #search NOT match
+        PATTERN_2 = "(tv|screen|écran|speakers|wire|electronic|saw|headphones|arduino|print|television)"  # search NOT match
         PATTERN_3 = "(book|games|cool|guide|box)"
 
-        COLOR_1 = "#FF0000" #red
-        COLOR_2 = "#3186cc" #blue
-        COLOR_3 = "#000000" #black
+        COLOR_1 = "#FF0000"  # red
+        COLOR_2 = "#3186cc"  # blue
+        COLOR_3 = "#000000"  # black
 
         COLOR_DEFAULT = "white"
         if re.search(PATTERN_1, stuff, re.I):

@@ -56,7 +56,7 @@ class Stuff:
         return d
 
     @classmethod
-    def parse_item(cls, tag: Tag, city):
+    def parse_item(cls, tag: Tag, city: str):
         """
         parse the <li> tag and return the Stuff
         """

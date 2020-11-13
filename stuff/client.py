@@ -1,3 +1,4 @@
+from typing import Optional
 import time
 import attr
 import logging
@@ -17,6 +18,8 @@ class StatefulClient:
     It ties together the necessary search and DB client
     with an arbitrary `stuff.emitters.Emitter`.
 
+    examples:
+
     client = StatefulClient.new()  # default Stdout emitter
     client.setup()  # create in memory db tables
     try:
@@ -24,6 +27,10 @@ class StatefulClient:
     except KeyboardInterrupt:
         client.log.info("Interrupted the loop with keyboard")
         sys.exit(0)
+
+    proxy example:
+
+      proxies = {"http": "http://1.1.1.1:3129"}
     """
 
     db_client: DBClient = attr.ib()
@@ -31,13 +38,13 @@ class StatefulClient:
     emitter: Emitter = attr.ib()
     sleep_seconds: int = attr.ib()
     logger: Logger = attr.ib()
-    proxy: str = attr.ib()
+    proxies: Optional[dict] = attr.ib()
 
     @classmethod
     def new(
             cls, db_path="sqlite://", search=Search(),
             emitter=EmitStdout(), sleep_seconds=3000,
-            log_level="INFO", proxy=None,
+            log_level="INFO", proxies=None,
     ):
         """
         default sqlite db is in-memory
@@ -52,7 +59,7 @@ class StatefulClient:
         )
 
         db = DBClient.new(db_path)
-        return cls(db, search, emitter, sleep_seconds, logger, proxy)
+        return cls(db, search, emitter, sleep_seconds, logger, proxies)
 
     def query(self, region: Region, area: Area, category: Category, keyword: str, proximinity: Proximinity):
         self.search = Search(
@@ -89,10 +96,10 @@ class StatefulClient:
             self.logger.info(f"Enriching {len(new_items)} items")
             if limit_enrichment:
                 new_items = Search.enrich_inventory(
-                    new_items[:limit_enrichment], self.proxy
+                    new_items[:limit_enrichment], self.proxies
                 ) + new_items[limit_enrichment:]
             else:
-                new_items = Search.enrich_inventory(new_items)
+                new_items = Search.enrich_inventory(new_items, self.proxies)
 
         self.logger.info("Inserting {} item".format(len(new_items)))
         for item in new_items:
