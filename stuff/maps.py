@@ -142,7 +142,7 @@ class Charter:
         elif "vancouver" in self.city:
             coord = [49.2827, -123.1207]
         elif "losangeles" in self.city:
-            coord = [34.0522, 118.2437]
+            coord = [34.0522, -118.2437]
         else:
             try:
                 geolocator = Nominatim(user_agent="TreasureMap/2")
