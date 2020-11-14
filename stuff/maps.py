@@ -131,18 +131,18 @@ class Charter:
 
     def find_city_center(self):
         """Return city center longitude latitude."""
-        if re.match("montreal", self.city, re.I):
+        if "montreal" in self.city:
             coord = [45.5088, -73.5878]
-        elif re.match("newyork", self.city, re.I):
+        elif "newyork" in self.city:
             coord = [40.7127, -74.0058]
-        elif re.match("toronto", self.city, re.I):
+        elif "toronto" in self.city:
             coord = [43.7, -79.4000]
-        elif re.match("washingtondc", self.city, re.I):
+        elif "washingtondc" in self.city:
             coord = [38.9047, -77.0164]
-        elif re.match("vancouver", self.city, re.I):
+        elif "vancouver" in self.city:
             coord = [49.2827, -123.1207]
-        elif re.match("sanfrancisco", self.city, re.I):
-            coord = [37.773972, -122.431297]
+        elif "losangeles" in self.city:
+            coord = [34.0522, 118.2437]
         else:
             try:
                 geolocator = Nominatim(user_agent="TreasureMap/2")
